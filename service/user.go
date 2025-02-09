@@ -121,3 +121,14 @@ func (s *UserService) IsUserExist(ctx context.Context, req *pb.UserId) (*pb.Void
 	s.Logger.Info("IsUserExist rpc method finished")
 	return &pb.Void{}, nil
 }
+
+func (s *UserService) DeleteMediaUser(ctx context.Context, req *pb.UserId) (*pb.Void, error) {
+	s.Logger.Info("DeleteMediaUser rpc method is working")
+	err := s.User.User().DeleteMediaUser(ctx, req)
+	if err != nil {
+		s.Logger.Error(fmt.Sprintf("error deleting media user: %v", err))
+		return nil, err
+	}
+	s.Logger.Info("DeleteMediaUser rpc method finished")
+	return &pb.Void{}, nil
+}

@@ -19,15 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	User_Register_FullMethodName       = "/user.User/Register"
-	User_Login_FullMethodName          = "/user.User/Login"
-	User_GetUSerByEmail_FullMethodName = "/user.User/GetUSerByEmail"
-	User_GetUserById_FullMethodName    = "/user.User/GetUserById"
-	User_UpdatePassword_FullMethodName = "/user.User/UpdatePassword"
-	User_ResetPassword_FullMethodName  = "/user.User/ResetPassword"
-	User_UpdateUser_FullMethodName     = "/user.User/UpdateUser"
-	User_DeleteUser_FullMethodName     = "/user.User/DeleteUser"
-	User_IsUserExist_FullMethodName    = "/user.User/IsUserExist"
+	User_Register_FullMethodName        = "/user.User/Register"
+	User_Login_FullMethodName           = "/user.User/Login"
+	User_GetUSerByEmail_FullMethodName  = "/user.User/GetUSerByEmail"
+	User_GetUserById_FullMethodName     = "/user.User/GetUserById"
+	User_UpdatePassword_FullMethodName  = "/user.User/UpdatePassword"
+	User_ResetPassword_FullMethodName   = "/user.User/ResetPassword"
+	User_UpdateUser_FullMethodName      = "/user.User/UpdateUser"
+	User_DeleteUser_FullMethodName      = "/user.User/DeleteUser"
+	User_IsUserExist_FullMethodName     = "/user.User/IsUserExist"
+	User_DeleteMediaUser_FullMethodName = "/user.User/DeleteMediaUser"
 )
 
 // UserClient is the client API for User service.
@@ -43,6 +44,7 @@ type UserClient interface {
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*Void, error)
 	DeleteUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*Void, error)
 	IsUserExist(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*Void, error)
+	DeleteMediaUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*Void, error)
 }
 
 type userClient struct {
@@ -143,6 +145,16 @@ func (c *userClient) IsUserExist(ctx context.Context, in *UserId, opts ...grpc.C
 	return out, nil
 }
 
+func (c *userClient) DeleteMediaUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*Void, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Void)
+	err := c.cc.Invoke(ctx, User_DeleteMediaUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServer is the server API for User service.
 // All implementations must embed UnimplementedUserServer
 // for forward compatibility.
@@ -156,6 +168,7 @@ type UserServer interface {
 	UpdateUser(context.Context, *UpdateUserRequest) (*Void, error)
 	DeleteUser(context.Context, *UserId) (*Void, error)
 	IsUserExist(context.Context, *UserId) (*Void, error)
+	DeleteMediaUser(context.Context, *UserId) (*Void, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -192,6 +205,9 @@ func (UnimplementedUserServer) DeleteUser(context.Context, *UserId) (*Void, erro
 }
 func (UnimplementedUserServer) IsUserExist(context.Context, *UserId) (*Void, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IsUserExist not implemented")
+}
+func (UnimplementedUserServer) DeleteMediaUser(context.Context, *UserId) (*Void, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteMediaUser not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 func (UnimplementedUserServer) testEmbeddedByValue()              {}
@@ -376,6 +392,24 @@ func _User_IsUserExist_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _User_DeleteMediaUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).DeleteMediaUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: User_DeleteMediaUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).DeleteMediaUser(ctx, req.(*UserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // User_ServiceDesc is the grpc.ServiceDesc for User service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -418,6 +452,10 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "IsUserExist",
 			Handler:    _User_IsUserExist_Handler,
+		},
+		{
+			MethodName: "DeleteMediaUser",
+			Handler:    _User_DeleteMediaUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

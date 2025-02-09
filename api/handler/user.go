@@ -444,8 +444,9 @@ func (h *Handler) deletePhoto(id string, ctx context.Context) error {
 	}
 
 	// Foydalanuvchining photo maydonini bo‘sh qilish
-	reqmain := pb.UpdateUserRequest{Id: id, Photo: ""}
-	_, err = h.User.UpdateUser(ctx, &reqmain)
+	_, err = h.User.DeleteMediaUser(ctx, &pb.UserId{
+		Id: id,
+	})
 	if err != nil {
 		h.Log.Error(err.Error())
 		return fmt.Errorf("error updating user: %v", err)

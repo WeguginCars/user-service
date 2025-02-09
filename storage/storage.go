@@ -20,4 +20,5 @@ type IUserStorage interface {
 	DeleteUser(context.Context, *pb.UserId) error
 	ResetPassword(context.Context, *pb.ResetPasswordReq) error
 	IsUserExist(context.Context, *pb.UserId) error
+	DeleteMediaUser(context.Context, *pb.UserId) error
 }

@@ -390,3 +390,24 @@ func (u *UserRepository) IsUserExist(ctx context.Context, req *pb.UserId) error 
 
 	return nil
 }
+
+func (u *UserRepository) DeleteMediaUser(ctx context.Context, req *pb.UserId) error {
+	query := `UPDATE users SET photo = NULL 
+    WHERE user_id = $1 AND deleted_at=0`
+
+	result, err := u.Db.ExecContext(ctx, query, req.Id)
+	if err != nil {
+		return fmt.Errorf("failed to update photo: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to check rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("user not found or user is deleted")
+	}
+
+	return nil
+}
