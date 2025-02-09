@@ -19,6 +19,7 @@ services:
       - POSTGRES_USER=${PDB_USER}
       - POSTGRES_PASSWORD=${PDB_PASSWORD}
       - POSTGRES_DB=${PDB_NAME}
+      - POSTGRES_PORT=${PDB_PORT}
     ports:
       - "5432:5432"
     volumes:
@@ -26,7 +27,7 @@ services:
     networks:
       - wegugin
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${PDB_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${PDB_USER} -d ${PDB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
