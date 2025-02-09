@@ -1,4 +1,4 @@
-FROM golang:1.22.1 AS builder
+FROM golang:1.23.4 AS builder
 
 WORKDIR /app
 
@@ -16,8 +16,9 @@ WORKDIR /app
 
 COPY --from=builder /app/myapp .
 COPY --from=builder /app/api/email/template.html ./api/email/
+COPY --from=builder /app/app.log ./
 COPY --from=builder /app/.env .
 
-EXPOSE 8085
+EXPOSE 8080
 
 CMD ["./myapp"]

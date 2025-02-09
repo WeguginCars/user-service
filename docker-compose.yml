@@ -46,7 +46,7 @@ services:
     container_name: auth
     build: .
     ports:
-      - "8085:8085"
+      - "8080:8080"
     networks:
      - wegugin
     depends_on:
