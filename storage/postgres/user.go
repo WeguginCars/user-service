@@ -393,7 +393,7 @@ func (u *UserRepository) IsUserExist(ctx context.Context, req *pb.UserId) error 
 
 func (u *UserRepository) DeleteMediaUser(ctx context.Context, req *pb.UserId) error {
 	query := `UPDATE users SET photo = NULL 
-    WHERE user_id = $1 AND deleted_at=0`
+    WHERE id = $1 AND deleted_at=0`
 
 	result, err := u.Db.ExecContext(ctx, query, req.Id)
 	if err != nil {
