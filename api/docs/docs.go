@@ -75,7 +75,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "tokens",
+                        "description": "Token",
                         "schema": {
                             "type": "string"
                         }
@@ -115,9 +115,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Token",
                         "schema": {
-                            "$ref": "#/definitions/user.RegisterRes"
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -213,28 +213,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "error while reading from server",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/user/logout": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "logout",
-                "tags": [
-                    "user"
-                ],
-                "summary": "logout user",
-                "responses": {
-                    "200": {
-                        "description": "message",
                         "schema": {
                             "type": "string"
                         }
@@ -381,19 +359,25 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
+                "birth_date": {
+                    "type": "string"
+                },
                 "createdAt": {
                     "type": "string"
                 },
                 "email": {
                     "type": "string"
                 },
-                "fullname": {
+                "gender": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
-                "phone": {
+                "name": {
+                    "type": "string"
+                },
+                "phone_number": {
                     "type": "string"
                 },
                 "photo": {
@@ -401,13 +385,16 @@ const docTemplate = `{
                 },
                 "role": {
                     "type": "string"
+                },
+                "surname": {
+                    "type": "string"
                 }
             }
         },
         "user.LoginReq": {
             "type": "object",
             "properties": {
-                "email": {
+                "email_or_phone_number": {
                     "type": "string"
                 },
                 "password": {
@@ -418,30 +405,13 @@ const docTemplate = `{
         "user.RegisterReq": {
             "type": "object",
             "properties": {
-                "address": {
-                    "type": "string"
-                },
                 "email": {
-                    "type": "string"
-                },
-                "fullname": {
                     "type": "string"
                 },
                 "password": {
                     "type": "string"
                 },
                 "phone": {
-                    "type": "string"
-                },
-                "role": {
-                    "type": "string"
-                }
-            }
-        },
-        "user.RegisterRes": {
-            "type": "object",
-            "properties": {
-                "id": {
                     "type": "string"
                 }
             }
@@ -480,16 +450,25 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
-                "fullname": {
+                "birth_date": {
+                    "type": "string"
+                },
+                "gender": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
-                "phone": {
+                "name": {
+                    "type": "string"
+                },
+                "phone_number": {
                     "type": "string"
                 },
                 "photo": {
+                    "type": "string"
+                },
+                "surname": {
                     "type": "string"
                 }
             }

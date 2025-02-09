@@ -21,7 +21,7 @@ import (
 // @Description create new users
 // @Tags auth
 // @Param info body user.RegisterReq true "User info"
-// @Success 200 {object} user.RegisterRes
+// @Success 200 {object} string "Token"
 // @Failure 400 {object} string "Invalid data"
 // @Failure 500 {object} string "Server error"
 // @Router /auth/register [post]
@@ -55,7 +55,7 @@ func (h Handler) Register(c *gin.Context) {
 // @Description it generates new access and refresh tokens
 // @Tags auth
 // @Param userinfo body user.LoginReq true "username and password"
-// @Success 200 {object} string "tokens"
+// @Success 200 {object} string "Token"
 // @Failure 400 {object} string "Invalid date"
 // @Failure 500 {object} string "error while reading from server"
 // @Router /auth/login [post]

@@ -8,46 +8,41 @@ definitions:
     properties:
       address:
         type: string
+      birth_date:
+        type: string
       createdAt:
         type: string
       email:
         type: string
-      fullname:
+      gender:
         type: string
       id:
         type: string
-      phone:
+      name:
+        type: string
+      phone_number:
         type: string
       photo:
         type: string
       role:
         type: string
+      surname:
+        type: string
     type: object
   user.LoginReq:
     properties:
-      email:
+      email_or_phone_number:
         type: string
       password:
         type: string
     type: object
   user.RegisterReq:
     properties:
-      address:
-        type: string
       email:
-        type: string
-      fullname:
         type: string
       password:
         type: string
       phone:
-        type: string
-      role:
-        type: string
-    type: object
-  user.RegisterRes:
-    properties:
-      id:
         type: string
     type: object
   user.ResetPassReq:
@@ -72,13 +67,19 @@ definitions:
     properties:
       address:
         type: string
-      fullname:
+      birth_date:
+        type: string
+      gender:
         type: string
       id:
         type: string
-      phone:
+      name:
+        type: string
+      phone_number:
         type: string
       photo:
+        type: string
+      surname:
         type: string
     type: object
 info:
@@ -122,7 +123,7 @@ paths:
           $ref: '#/definitions/user.LoginReq'
       responses:
         "200":
-          description: tokens
+          description: Token
           schema:
             type: string
         "400":
@@ -148,9 +149,9 @@ paths:
           $ref: '#/definitions/user.RegisterReq'
       responses:
         "200":
-          description: OK
+          description: Token
           schema:
-            $ref: '#/definitions/user.RegisterRes'
+            type: string
         "400":
           description: Invalid data
           schema:
@@ -214,19 +215,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update User Profile
-      tags:
-      - user
-  /user/logout:
-    post:
-      description: logout
-      responses:
-        "200":
-          description: message
-          schema:
-            type: string
-      security:
-      - ApiKeyAuth: []
-      summary: logout user
       tags:
       - user
   /user/photo:
