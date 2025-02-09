@@ -238,7 +238,7 @@ func (h Handler) UpdateUserProfile(c *gin.Context) {
 // @Summary Update User Profile
 // @Description Update User Profile by token
 // @Tags user
-// @Param userinfo body user.ResetPasswordReq true "all"
+// @Param userinfo body model.ResetPassword true "all"
 // @Success 200 {object} string "Password changed successfully"
 // @Failure 400 {object} string "Invalid date"
 // @Failure 500 {object} string "error while reading from server"
@@ -451,4 +451,34 @@ func (h *Handler) deletePhoto(id string, ctx context.Context) error {
 		return fmt.Errorf("error updating user: %v", err)
 	}
 	return nil
+}
+
+// @Summary DeleteUserProfile
+// @Security ApiKeyAuth
+// @Description Api for deleting a user's profile
+// @Tags user
+// @Success 200 {object} string
+// @Failure 400 {object} string
+// @Failure 500 {object} string
+// @Router /user/delete [delete]
+func (h *Handler) DeleteUserProfile(c *gin.Context) {
+	h.Log.Info("DeleteUserProfile started")
+	// Tokenni olish va foydalanuvchi ID sini olish
+	token := c.GetHeader("Authorization")
+	id, _, err := auth.GetUserIdFromToken(token)
+	if err != nil {
+		h.Log.Error(err.Error())
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	_, err = h.User.DeleteUser(c, &pb.UserId{Id: id})
+	if err != nil {
+		h.Log.Error(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting user's profile"})
+		return
+	}
+
+	h.Log.Info("DeleteUserProfile finished successfully")
+	c.JSON(200, gin.H{"message": "User profile deleted successfully"})
 }

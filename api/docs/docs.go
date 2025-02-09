@@ -194,7 +194,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.ResetPasswordReq"
+                            "$ref": "#/definitions/model.ResetPassword"
                         }
                     }
                 ],
@@ -213,6 +213,40 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "error while reading from server",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/delete": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Api for deleting a user's profile",
+                "tags": [
+                    "user"
+                ],
+                "summary": "DeleteUserProfile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "string"
                         }
@@ -377,6 +411,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.ResetPassword": {
+            "type": "object",
+            "properties": {
+                "new_password": {
+                    "type": "string"
+                },
+                "old_password": {
+                    "type": "string"
+                }
+            }
+        },
         "model.UpdateUser": {
             "type": "object",
             "properties": {
@@ -481,20 +526,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "user.ResetPasswordReq": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "newpassword": {
-                    "type": "string"
-                },
-                "oldpassword": {
                     "type": "string"
                 }
             }

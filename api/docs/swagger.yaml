@@ -1,4 +1,11 @@
 definitions:
+  model.ResetPassword:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+    type: object
   model.UpdateUser:
     properties:
       address:
@@ -67,15 +74,6 @@ definitions:
       email:
         type: string
       password:
-        type: string
-    type: object
-  user.ResetPasswordReq:
-    properties:
-      id:
-        type: string
-      newpassword:
-        type: string
-      oldpassword:
         type: string
     type: object
 info:
@@ -194,7 +192,7 @@ paths:
         name: userinfo
         required: true
         schema:
-          $ref: '#/definitions/user.ResetPasswordReq'
+          $ref: '#/definitions/model.ResetPassword'
       responses:
         "200":
           description: Password changed successfully
@@ -211,6 +209,27 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update User Profile
+      tags:
+      - user
+  /user/delete:
+    delete:
+      description: Api for deleting a user's profile
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: DeleteUserProfile
       tags:
       - user
   /user/photo:
