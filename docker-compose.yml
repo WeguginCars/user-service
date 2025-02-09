@@ -1,0 +1,83 @@
+version: '3.9'
+
+services:
+
+  redis-db:  
+    image: redis:latest
+    container_name: redisemail
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_PASSWORD: "root"
+    networks:
+      - wegugin
+
+  postgres-db:
+    container_name: postgres
+    image: postgres
+    environment:
+      - POSTGRES_USER=${PDB_USER}
+      - POSTGRES_PASSWORD=${PDB_PASSWORD}
+      - POSTGRES_DB=${PDB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+    networks:
+      - wegugin
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PDB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  
+  migrate:
+    image: migrate/migrate
+    networks:
+      - wegugin
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      - postgres-db
+    command: ["-path", "/migrations", "-database" ,"postgres://${PDB_USER}:${PDB_PASSWORD}@postgres:${PDB_PORT}/${PDB_NAME}?sslmode=disable","up"]
+
+  userservice:
+    container_name: auth
+    build: .
+    ports:
+      - "8085:8085"
+    networks:
+     - wegugin
+    depends_on:
+      - postgres-db
+
+  minio:
+    image: docker.io/bitnami/minio:2024
+    ports:
+      - '9000:9000'
+    volumes:
+      - minio_data:/bitnami/minio/data
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY_ID}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_ACCESS_KEY}
+      - MINIO_DEFAULT_BUCKETS=photos,videos,musics
+    networks:
+      - wegugin
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+networks:
+  wegugin:
+    external: true
+
+
+volumes:
+  minio_data:
+    driver: local
+  db:
+    driver: local
+   

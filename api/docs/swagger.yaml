@@ -1,0 +1,315 @@
+definitions:
+  user.GetUSerByEmailReq:
+    properties:
+      email:
+        type: string
+    type: object
+  user.GetUserResponse:
+    properties:
+      address:
+        type: string
+      createdAt:
+        type: string
+      email:
+        type: string
+      fullname:
+        type: string
+      id:
+        type: string
+      phone:
+        type: string
+      photo:
+        type: string
+      role:
+        type: string
+    type: object
+  user.LoginReq:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  user.RegisterReq:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      fullname:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      role:
+        type: string
+    type: object
+  user.RegisterRes:
+    properties:
+      id:
+        type: string
+    type: object
+  user.ResetPassReq:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  user.ResetPasswordReq:
+    properties:
+      id:
+        type: string
+      newpassword:
+        type: string
+      oldpassword:
+        type: string
+    type: object
+  user.UpdateUserRequest:
+    properties:
+      address:
+        type: string
+      fullname:
+        type: string
+      id:
+        type: string
+      phone:
+        type: string
+      photo:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /auth/forgot-password:
+    post:
+      description: it send code to your email address
+      parameters:
+      - description: enough
+        in: body
+        name: token
+        required: true
+        schema:
+          $ref: '#/definitions/user.GetUSerByEmailReq'
+      responses:
+        "200":
+          description: message
+          schema:
+            type: string
+        "400":
+          description: Invalid date
+          schema:
+            type: string
+        "500":
+          description: error while reading from server
+          schema:
+            type: string
+      summary: Forgot Password
+      tags:
+      - auth
+  /auth/login:
+    post:
+      description: it generates new access and refresh tokens
+      parameters:
+      - description: username and password
+        in: body
+        name: userinfo
+        required: true
+        schema:
+          $ref: '#/definitions/user.LoginReq'
+      responses:
+        "200":
+          description: tokens
+          schema:
+            type: string
+        "400":
+          description: Invalid date
+          schema:
+            type: string
+        "500":
+          description: error while reading from server
+          schema:
+            type: string
+      summary: login user
+      tags:
+      - auth
+  /auth/register:
+    post:
+      description: create new users
+      parameters:
+      - description: User info
+        in: body
+        name: info
+        required: true
+        schema:
+          $ref: '#/definitions/user.RegisterReq'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.RegisterRes'
+        "400":
+          description: Invalid data
+          schema:
+            type: string
+        "500":
+          description: Server error
+          schema:
+            type: string
+      summary: Register user
+      tags:
+      - auth
+  /auth/reset-password:
+    post:
+      description: it Reset your Password
+      parameters:
+      - description: enough
+        in: body
+        name: token
+        required: true
+        schema:
+          $ref: '#/definitions/user.ResetPassReq'
+      responses:
+        "200":
+          description: message
+          schema:
+            type: string
+        "400":
+          description: Invalid date
+          schema:
+            type: string
+        "500":
+          description: error while reading from server
+          schema:
+            type: string
+      summary: Reset Password
+      tags:
+      - auth
+  /user/change-password:
+    post:
+      description: Update User Profile by token
+      parameters:
+      - description: all
+        in: body
+        name: userinfo
+        required: true
+        schema:
+          $ref: '#/definitions/user.ResetPasswordReq'
+      responses:
+        "200":
+          description: message
+          schema:
+            type: string
+        "400":
+          description: Invalid date
+          schema:
+            type: string
+        "500":
+          description: error while reading from server
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update User Profile
+      tags:
+      - user
+  /user/logout:
+    post:
+      description: logout
+      responses:
+        "200":
+          description: message
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: logout user
+      tags:
+      - user
+  /user/photo:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Api for upload a new photo
+      parameters:
+      - description: UploadMediaForm
+        in: formData
+        name: file
+        required: true
+        type: file
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: UploadMediaUser
+      tags:
+      - user
+  /user/profile:
+    get:
+      description: Get User Profile by token
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.GetUserResponse'
+        "400":
+          description: Invalid date
+          schema:
+            type: string
+        "500":
+          description: error while reading from server
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get User Profile
+      tags:
+      - user
+    put:
+      description: Update User Profile by token
+      parameters:
+      - description: all
+        in: body
+        name: userinfo
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateUserRequest'
+      responses:
+        "200":
+          description: message
+          schema:
+            type: string
+        "400":
+          description: Invalid date
+          schema:
+            type: string
+        "500":
+          description: error while reading from server
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update User Profile
+      tags:
+      - user
+securityDefinitions:
+  ApiKeyAuth:
+    description: API Gateway
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
