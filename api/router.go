@@ -35,6 +35,7 @@ func Router(hand *handler.Handler) *gin.Engine {
 		user.PUT("/profile", hand.UpdateUserProfile)
 		user.POST("/change-password", hand.ChangePassword)
 		user.POST("/photo", hand.UploadMediaUser)
+		user.DELETE("/photo", hand.DeleteMediaUser)
 
 	}
 	return router

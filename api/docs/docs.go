@@ -200,7 +200,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "message",
+                        "description": "Password changed successfully",
                         "schema": {
                             "type": "string"
                         }
@@ -244,6 +244,38 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Api for deleting a user's photo",
+                "tags": [
+                    "user"
+                ],
+                "summary": "DeleteMediaUser",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -317,13 +349,13 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.UpdateUserRequest"
+                            "$ref": "#/definitions/model.UpdateUser"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "message",
+                        "description": "User updated successfully",
                         "schema": {
                             "type": "string"
                         }
@@ -345,6 +377,29 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.UpdateUser": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "birth_date": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                }
+            }
+        },
         "user.GetUSerByEmailReq": {
             "type": "object",
             "properties": {
@@ -440,35 +495,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "oldpassword": {
-                    "type": "string"
-                }
-            }
-        },
-        "user.UpdateUserRequest": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "birth_date": {
-                    "type": "string"
-                },
-                "gender": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "phone_number": {
-                    "type": "string"
-                },
-                "photo": {
-                    "type": "string"
-                },
-                "surname": {
                     "type": "string"
                 }
             }

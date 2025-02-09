@@ -1,4 +1,19 @@
 definitions:
+  model.UpdateUser:
+    properties:
+      address:
+        type: string
+      birth_date:
+        type: string
+      gender:
+        type: string
+      name:
+        type: string
+      phone_number:
+        type: string
+      surname:
+        type: string
+    type: object
   user.GetUSerByEmailReq:
     properties:
       email:
@@ -61,25 +76,6 @@ definitions:
       newpassword:
         type: string
       oldpassword:
-        type: string
-    type: object
-  user.UpdateUserRequest:
-    properties:
-      address:
-        type: string
-      birth_date:
-        type: string
-      gender:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      phone_number:
-        type: string
-      photo:
-        type: string
-      surname:
         type: string
     type: object
 info:
@@ -201,7 +197,7 @@ paths:
           $ref: '#/definitions/user.ResetPasswordReq'
       responses:
         "200":
-          description: message
+          description: Password changed successfully
           schema:
             type: string
         "400":
@@ -218,6 +214,26 @@ paths:
       tags:
       - user
   /user/photo:
+    delete:
+      description: Api for deleting a user's photo
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: DeleteMediaUser
+      tags:
+      - user
     post:
       consumes:
       - multipart/form-data
@@ -275,10 +291,10 @@ paths:
         name: userinfo
         required: true
         schema:
-          $ref: '#/definitions/user.UpdateUserRequest'
+          $ref: '#/definitions/model.UpdateUser'
       responses:
         "200":
-          description: message
+          description: User updated successfully
           schema:
             type: string
         "400":
