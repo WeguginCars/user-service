@@ -7,7 +7,9 @@ import (
 	"path/filepath"
 	"wegugin/api/auth"
 	"wegugin/api/email"
+	"wegugin/config"
 	pb "wegugin/genproto/user"
+	"wegugin/model"
 	"wegugin/storage/redis"
 
 	"github.com/gin-gonic/gin"
@@ -41,7 +43,7 @@ func (h Handler) Register(c *gin.Context) {
 	res, err := h.User.Register(c, &req)
 	if err != nil {
 		h.Log.Error(err.Error())
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	h.Log.Info("Register ended")
@@ -72,7 +74,7 @@ func (h Handler) Login(c *gin.Context) {
 	res, err := h.User.Login(c, &req)
 	if err != nil {
 		h.Log.Error(err.Error())
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -193,8 +195,8 @@ func (h Handler) GetUserProfile(c *gin.Context) {
 // @Summary Update User Profile
 // @Description Update User Profile by token
 // @Tags user
-// @Param userinfo body user.UpdateUserRequest true "all"
-// @Success 200 {object} string "message"
+// @Param userinfo body model.UpdateUser true "all"
+// @Success 200 {object} string "User updated successfully"
 // @Failure 400 {object} string "Invalid date"
 // @Failure 500 {object} string "error while reading from server"
 // @Router /user/profile [put]
@@ -207,14 +209,21 @@ func (h Handler) UpdateUserProfile(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
-	var user pb.UpdateUserRequest
+	var user model.UpdateUser
 	if err := c.BindJSON(&user); err != nil {
 		h.Log.Error(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	user.Id = id
-	_, err = h.User.UpdateUser(c, &user)
+	_, err = h.User.UpdateUser(c, &pb.UpdateUserRequest{
+		Id:          id,
+		Name:        user.Name,
+		Surname:     user.Surname,
+		BirthDate:   user.BirthDate,
+		Gender:      user.Gender,
+		Address:     user.Address,
+		PhoneNumber: user.PhoneNumber,
+	})
 	if err != nil {
 		h.Log.Error(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating user"})
@@ -230,7 +239,7 @@ func (h Handler) UpdateUserProfile(c *gin.Context) {
 // @Description Update User Profile by token
 // @Tags user
 // @Param userinfo body user.ResetPasswordReq true "all"
-// @Success 200 {object} string "message"
+// @Success 200 {object} string "Password changed successfully"
 // @Failure 400 {object} string "Invalid date"
 // @Failure 500 {object} string "error while reading from server"
 // @Router /user/change-password [post]
@@ -243,14 +252,17 @@ func (h Handler) ChangePassword(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
-	var user pb.ResetPasswordReq
+	var user model.ResetPassword
 	if err := c.BindJSON(&user); err != nil {
 		h.Log.Error(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	user.Id = id
-	_, err = h.User.ResetPassword(c, &user)
+	_, err = h.User.ResetPassword(c, &pb.ResetPasswordReq{
+		Id:          id,
+		Newpassword: user.NewPassword,
+		Oldpassword: user.OldPassword,
+	})
 	if err != nil {
 		h.Log.Error(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error resetting password"})
@@ -280,13 +292,13 @@ func (h *Handler) UploadMediaUser(c *gin.Context) {
 	defer file.Close()
 
 	// minio start
+	cfg := config.Load()
 
 	fileExt := filepath.Ext(header.Filename)
-	println("\n File Ext:", fileExt)
 
 	newFile := uuid.NewString() + fileExt
-	minioClient, err := minio.New("localhost:9000", &minio.Options{
-		Creds:  credentials.NewStaticV4("test", "minioadmin", ""),
+	minioClient, err := minio.New(cfg.Minio.MINIO_ENDPOINT, &minio.Options{
+		Creds:  credentials.NewStaticV4(cfg.Minio.MINIO_ACCESS_KEY_ID, cfg.Minio.MINIO_SECRET_ACCESS_KEY, ""),
 		Secure: false,
 	})
 	if err != nil {
@@ -295,7 +307,7 @@ func (h *Handler) UploadMediaUser(c *gin.Context) {
 	}
 
 	info, err := minioClient.PutObject(context.Background(), "photos", newFile, file, header.Size, minio.PutObjectOptions{
-		ContentType: "image/jpeg",
+		ContentType: getContentType(fileExt),
 	})
 	if err != nil {
 		c.AbortWithError(500, err)
@@ -322,7 +334,7 @@ func (h *Handler) UploadMediaUser(c *gin.Context) {
 		return
 	}
 
-	madeUrl := fmt.Sprintf("http://localhost:9000/photos/%s", newFile)
+	madeUrl := fmt.Sprintf("http://%s/photos/%s", cfg.Minio.MINIO_ENDPOINT, newFile)
 
 	println("\n Info Bucket:", info.Bucket)
 
@@ -332,6 +344,12 @@ func (h *Handler) UploadMediaUser(c *gin.Context) {
 	if err != nil {
 		h.Log.Error(err.Error())
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	err = h.deletePhoto(id, c)
+	if err != nil {
+		h.Log.Error(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting user's photo"})
 		return
 	}
 
@@ -347,4 +365,90 @@ func (h *Handler) UploadMediaUser(c *gin.Context) {
 		"minio url": madeUrl,
 	})
 
+}
+
+func getContentType(fileExt string) string {
+	switch fileExt {
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".png":
+		return "image/png"
+	default:
+		return "application/octet-stream"
+	}
+}
+
+// @Summary DeleteMediaUser
+// @Security ApiKeyAuth
+// @Description Api for deleting a user's photo
+// @Tags user
+// @Success 200 {object} string
+// @Failure 400 {object} string
+// @Failure 500 {object} string
+// @Router /user/photo [delete]
+func (h *Handler) DeleteMediaUser(c *gin.Context) {
+	h.Log.Info("DeleteMediaUser started")
+
+	// Tokenni olish va foydalanuvchi ID sini olish
+	token := c.GetHeader("Authorization")
+	id, _, err := auth.GetUserIdFromToken(token)
+	if err != nil {
+		h.Log.Error(err.Error())
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	err = h.deletePhoto(id, c)
+	if err != nil {
+		h.Log.Error(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting user's photo"})
+		return
+	}
+
+	h.Log.Info("DeleteMediaUser finished successfully")
+	c.JSON(200, gin.H{"message": "User photo deleted successfully"})
+}
+
+func (h *Handler) deletePhoto(id string, ctx context.Context) error {
+	// Foydalanuvchi ma'lumotlarini olish
+	user, err := h.User.GetUserById(ctx, &pb.UserId{Id: id})
+	if err != nil {
+		h.Log.Error(err.Error())
+		return fmt.Errorf("error retrieving user data: %v", err)
+	}
+
+	// Foydalanuvchining joriy fotosi yo'qligini tekshirish
+	if user.Photo == "" {
+		h.Log.Error("User has no photo to delete")
+		return nil
+	}
+
+	// MinIO clientni sozlash
+	cfg := config.Load()
+	minioClient, err := minio.New(cfg.Minio.MINIO_ENDPOINT, &minio.Options{
+		Creds:  credentials.NewStaticV4(cfg.Minio.MINIO_ACCESS_KEY_ID, cfg.Minio.MINIO_SECRET_ACCESS_KEY, ""),
+		Secure: false,
+	})
+	if err != nil {
+		return fmt.Errorf("error initializing MinIO client: %v", err)
+	}
+
+	// Rasm nomini olish
+	fileName := filepath.Base(user.Photo)
+
+	// MinIO'dan faylni o‘chirish
+	err = minioClient.RemoveObject(context.Background(), "photos", fileName, minio.RemoveObjectOptions{})
+	if err != nil {
+		h.Log.Error(err.Error())
+		return fmt.Errorf("error deleting photo from MinIO: %v", err)
+	}
+
+	// Foydalanuvchining photo maydonini bo‘sh qilish
+	reqmain := pb.UpdateUserRequest{Id: id, Photo: ""}
+	_, err = h.User.UpdateUser(ctx, &reqmain)
+	if err != nil {
+		h.Log.Error(err.Error())
+		return fmt.Errorf("error updating user: %v", err)
+	}
+	return nil
 }
