@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 	"wegugin/api/auth"
 	pb "wegugin/genproto/user"
 	"wegugin/storage"
@@ -27,24 +28,30 @@ func (u UserRepository) CreateUser(ctx context.Context, req *pb.RegisterReq) (*p
 		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
+	// birth_date format: dd-mm-yyyy, convert to YYYY-MM-DD for PostgreSQL
+	birthDate, err := time.Parse("02-01-2006", req.BirthDate)
+	if err != nil {
+		return nil, fmt.Errorf("invalid birth_date format: %w", err)
+	}
+
 	tx, err := u.Db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
 
 	var userID, userRole string
-	userQuery := `INSERT INTO users (email, password_hash, phone_number)
-                  VALUES ($1, $2, $3) RETURNING id, role`
-	err = tx.QueryRowContext(ctx, userQuery, req.Email, string(hashedPassword), req.Phone).Scan(&userID, &userRole)
+	userQuery := `INSERT INTO users (email, name, surname, password_hash, phone_number, birth_date, gender)
+                  VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, role`
+	err = tx.QueryRowContext(ctx, userQuery, req.Email, req.Name, req.Surname, string(hashedPassword), req.Phone, birthDate, req.Gender).Scan(&userID, &userRole)
 	if err != nil {
 		tx.Rollback()
 		return nil, fmt.Errorf("failed to insert user: %w", err)
 	}
 
-	err = tx.Commit()
-	if err != nil {
+	if err = tx.Commit(); err != nil {
 		return nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
+
 	token, err := auth.GenerateJWTToken(userID, userRole)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate jwt token: %w", err)

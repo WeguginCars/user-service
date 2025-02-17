@@ -60,11 +60,19 @@ definitions:
     type: object
   user.RegisterReq:
     properties:
+      birth_date:
+        type: string
       email:
+        type: string
+      gender:
+        type: string
+      name:
         type: string
       password:
         type: string
       phone:
+        type: string
+      surname:
         type: string
     type: object
   user.ResetPassReq:

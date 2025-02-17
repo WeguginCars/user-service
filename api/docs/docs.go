@@ -505,13 +505,25 @@ const docTemplate = `{
         "user.RegisterReq": {
             "type": "object",
             "properties": {
+                "birth_date": {
+                    "type": "string"
+                },
                 "email": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 },
                 "password": {
                     "type": "string"
                 },
                 "phone": {
+                    "type": "string"
+                },
+                "surname": {
                     "type": "string"
                 }
             }
