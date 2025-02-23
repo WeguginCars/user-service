@@ -27,15 +27,15 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            # Check if the USER-SERVICE directory exists
-            if [ -d "USER-SERVICE" ]; then
+            # Check if the user-service directory exists
+            if [ -d "user-service" ]; then
               echo "Repository exists. Pulling latest changes..."
-              cd USER-SERVICE
+              cd user-service
               git pull origin main
             else
               echo "Repository does not exist. Cloning repository..."
               git clone git@github.com:WeguginCars/user-service.git
-              cd USER-SERVICE
+              cd user-service
             fi
 
             # Stop and remove existing Docker containers
