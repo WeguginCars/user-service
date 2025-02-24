@@ -191,6 +191,31 @@ paths:
       summary: Reset Password
       tags:
       - auth
+  /auth/user/{id}:
+    get:
+      description: Get User By Id
+      parameters:
+      - description: USER ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.GetUserResponse'
+        "400":
+          description: Invalid date
+          schema:
+            type: string
+        "500":
+          description: error while reading from server
+          schema:
+            type: string
+      summary: Get User By Id
+      tags:
+      - auth
   /user/change-password:
     post:
       description: Update User Profile by token

@@ -84,6 +84,28 @@ func (h Handler) Login(c *gin.Context) {
 	})
 }
 
+// GetUserById godoc
+// @Summary Get User By Id
+// @Description Get User By Id
+// @Tags auth
+// @Param id path string true "USER ID"
+// @Success 200 {object} user.GetUserResponse
+// @Failure 400 {object} string "Invalid date"
+// @Failure 500 {object} string "error while reading from server"
+// @Router /auth/user/{id} [get]
+func (h Handler) GetUserById(c *gin.Context) {
+	h.Log.Info("GetUserById is working")
+	id := c.Param("id")
+	res, err := h.User.GetUserById(c, &pb.UserId{Id: id})
+	if err != nil {
+		h.Log.Error(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	h.Log.Info("GetUserById succeeded")
+	c.JSON(http.StatusOK, res)
+}
+
 // ForgotPassword godoc
 // @Summary Forgot Password
 // @Description it send code to your email address

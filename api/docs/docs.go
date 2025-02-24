@@ -175,6 +175,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/user/{id}": {
+            "get": {
+                "description": "Get User By Id",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get User By Id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "USER ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.GetUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid date",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error while reading from server",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/user/change-password": {
             "post": {
                 "security": [

@@ -26,6 +26,7 @@ func Router(hand *handler.Handler) *gin.Engine {
 		auth.POST("/login", hand.Login)
 		auth.POST("/forgot-password", hand.ForgotPassword)
 		auth.POST("/reset-password", hand.ResetPassword)
+		auth.GET("/user/:id", hand.GetUserById)
 	}
 
 	user := router.Group("/user")
