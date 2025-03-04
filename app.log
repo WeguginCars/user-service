@@ -1,0 +1,8 @@
+time=2025-03-04T16:08:16.812+05:00 level=INFO msg="Login is working"
+time=2025-03-04T16:08:16.963+05:00 level=INFO msg="Login rpc method is working"
+time=2025-03-04T16:08:17.079+05:00 level=INFO msg="Login rpc method finished"
+time=2025-03-04T16:08:17.079+05:00 level=INFO msg="login is succesfully ended"
+time=2025-03-04T16:09:07.924+05:00 level=INFO msg="GetUserProfile is working"
+time=2025-03-04T16:09:07.926+05:00 level=INFO msg="GetUserById rpc method is working"
+time=2025-03-04T16:09:07.932+05:00 level=INFO msg="GetUserById rpc method finished"
+time=2025-03-04T16:09:07.933+05:00 level=INFO msg="GetUserProfile successful finished"
