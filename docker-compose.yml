@@ -48,6 +48,7 @@ services:
     build: .
     ports:
       - "8080:8080"
+      - "8085:8085"
     networks:
      - wegugin
     depends_on:
