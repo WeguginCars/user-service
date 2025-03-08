@@ -50,9 +50,14 @@ services:
       - "8080:8080"
       - "8085:8085"
     networks:
-     - wegugin
+      - wegugin
     depends_on:
-      - postgres-db
+      postgres-db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+
 
   minio:
     image: docker.io/bitnami/minio:2024
