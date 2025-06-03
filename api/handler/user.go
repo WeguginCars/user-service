@@ -356,7 +356,7 @@ func (h *Handler) UploadMediaUser(c *gin.Context) {
 		return
 	}
 
-	madeUrl := fmt.Sprintf("http://%s/photos/%s", cfg.Minio.MINIO_ENDPOINT, newFile)
+	madeUrl := fmt.Sprintf("%s/photos/%s", cfg.Minio.MINIO_PUBLIC_URL, newFile)
 
 	println("\n Info Bucket:", info.Bucket)
 
