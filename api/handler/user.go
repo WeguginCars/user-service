@@ -356,6 +356,8 @@ func (h *Handler) UploadMediaUser(c *gin.Context) {
 		return
 	}
 
+	// UploadMediaUser funksiyasida madeUrl yaratish qismini o'zgartiring:
+
 	madeUrl := fmt.Sprintf("%s/photos/%s", cfg.Minio.MINIO_PUBLIC_URL, newFile)
 
 	println("\n Info Bucket:", info.Bucket)
