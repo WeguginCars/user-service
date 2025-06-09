@@ -35,7 +35,7 @@ func SendEmail(email string, code string) error {
 	from := "noreply@turbocarsautoexport.com"
 
 	// Local SMTP server
-	smtpHost := "localhost"
+	smtpHost := "127.0.0.1"
 	smtpPort := "25"
 
 	// Authentication yo'q (local server)
