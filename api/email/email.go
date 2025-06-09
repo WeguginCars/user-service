@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"log"
 	"math/rand"
-	"net"
 	"net/smtp"
 	"regexp"
 	"strconv"
 	"time"
+	"wegugin/config"
 )
 
 func EmailCode(email string) (string, error) {
@@ -32,71 +33,45 @@ func EmailCode(email string) (string, error) {
 }
 
 func SendEmail(email string, code string) error {
-	from := "noreply@turbocarsautoexport.com"
-	smtpHost := "172.17.0.1"
-	smtpPort := "2525"
+	conf := config.Load()
+	// sender data
+	from := conf.Email.SENDER_EMAIL
+	password := conf.Email.APP_PASSWORD
 
-	to := []string{email}
+	// Receiver email address
+	to := []string{
+		email,
+	}
+
+	// smtp server configuration.
+	smtpHost := "smtp.gmail.com"
+	smtpPort := "587"
+
+	// Authentication.
+	auth := smtp.PlainAuth("", from, password, smtpHost)
 
 	t, err := template.ParseFiles("api/email/template.html")
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 
 	var body bytes.Buffer
-	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	headers := fmt.Sprintf("From: TurboCars <%s>\r\n", from)
-	headers += fmt.Sprintf("To: %s\r\n", email)
-	headers += "Subject: Your verification code\r\n"
-	headers += mimeHeaders
-	body.Write([]byte(headers))
 
+	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
+	body.Write([]byte(fmt.Sprintf("Subject: Your verification code \n%s\n\n", mimeHeaders)))
 	t.Execute(&body, struct {
 		Passwd string
 	}{
+
 		Passwd: code,
 	})
 
-	// Manual SMTP connection without TLS
-	conn, err := net.Dial("tcp", smtpHost+":"+smtpPort)
+	// Sending email.
+	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, body.Bytes())
 	if err != nil {
 		return err
 	}
-	defer conn.Close()
-
-	client, err := smtp.NewClient(conn, smtpHost)
-	if err != nil {
-		return err
-	}
-	defer client.Quit()
-
-	// Set sender
-	if err := client.Mail(from); err != nil {
-		return err
-	}
-
-	// Set recipient
-	if err := client.Rcpt(to[0]); err != nil {
-		return err
-	}
-
-	// Send body
-	writer, err := client.Data()
-	if err != nil {
-		return err
-	}
-
-	_, err = writer.Write(body.Bytes())
-	if err != nil {
-		return err
-	}
-
-	err = writer.Close()
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Email sent to:", email)
+	fmt.Println("Email sended to:", email)
 	return nil
 }
 
