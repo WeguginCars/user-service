@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"math/rand"
+	"net"
 	"net/smtp"
 	"regexp"
 	"strconv"
@@ -31,15 +32,9 @@ func EmailCode(email string) (string, error) {
 }
 
 func SendEmail(email string, code string) error {
-	// O'z domeningiz orqali
 	from := "noreply@turbocarsautoexport.com"
-
-	// Local SMTP server
 	smtpHost := "172.17.0.1"
 	smtpPort := "2525"
-
-	// Authentication yo'q (local server)
-	var auth smtp.Auth = nil
 
 	to := []string{email}
 
@@ -50,13 +45,10 @@ func SendEmail(email string, code string) error {
 
 	var body bytes.Buffer
 	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-
-	// Headers to'liq
 	headers := fmt.Sprintf("From: TurboCars <%s>\r\n", from)
 	headers += fmt.Sprintf("To: %s\r\n", email)
 	headers += "Subject: Your verification code\r\n"
 	headers += mimeHeaders
-
 	body.Write([]byte(headers))
 
 	t.Execute(&body, struct {
@@ -65,8 +57,41 @@ func SendEmail(email string, code string) error {
 		Passwd: code,
 	})
 
-	// Jo'natish
-	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, body.Bytes())
+	// Manual SMTP connection without TLS
+	conn, err := net.Dial("tcp", smtpHost+":"+smtpPort)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client, err := smtp.NewClient(conn, smtpHost)
+	if err != nil {
+		return err
+	}
+	defer client.Quit()
+
+	// Set sender
+	if err := client.Mail(from); err != nil {
+		return err
+	}
+
+	// Set recipient
+	if err := client.Rcpt(to[0]); err != nil {
+		return err
+	}
+
+	// Send body
+	writer, err := client.Data()
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.Write(body.Bytes())
+	if err != nil {
+		return err
+	}
+
+	err = writer.Close()
 	if err != nil {
 		return err
 	}
