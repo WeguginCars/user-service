@@ -4,13 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
-	"log"
 	"math/rand"
 	"net/smtp"
 	"regexp"
 	"strconv"
 	"time"
-	"wegugin/config"
 )
 
 func EmailCode(email string) (string, error) {
@@ -33,45 +31,47 @@ func EmailCode(email string) (string, error) {
 }
 
 func SendEmail(email string, code string) error {
-	conf := config.Load()
-	// sender data
-	from := conf.Email.SENDER_EMAIL
-	password := conf.Email.APP_PASSWORD
+	// O'z domeningiz orqali
+	from := "noreply@turbocarsautoexport.com"
 
-	// Receiver email address
-	to := []string{
-		email,
-	}
+	// Local SMTP server
+	smtpHost := "localhost"
+	smtpPort := "25"
 
-	// smtp server configuration.
-	smtpHost := "smtp.gmail.com"
-	smtpPort := "587"
+	// Authentication yo'q (local server)
+	var auth smtp.Auth = nil
 
-	// Authentication.
-	auth := smtp.PlainAuth("", from, password, smtpHost)
+	to := []string{email}
 
 	t, err := template.ParseFiles("api/email/template.html")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	var body bytes.Buffer
-
 	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	body.Write([]byte(fmt.Sprintf("Subject: Your verification code \n%s\n\n", mimeHeaders)))
+
+	// Headers to'liq
+	headers := fmt.Sprintf("From: TurboCars <%s>\r\n", from)
+	headers += fmt.Sprintf("To: %s\r\n", email)
+	headers += "Subject: Your verification code\r\n"
+	headers += mimeHeaders
+
+	body.Write([]byte(headers))
+
 	t.Execute(&body, struct {
 		Passwd string
 	}{
-
 		Passwd: code,
 	})
 
-	// Sending email.
+	// Jo'natish
 	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, body.Bytes())
 	if err != nil {
 		return err
 	}
-	fmt.Println("Email sended to:", email)
+
+	fmt.Println("Email sent to:", email)
 	return nil
 }
 
