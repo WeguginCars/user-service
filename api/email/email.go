@@ -36,7 +36,7 @@ func SendEmail(email string, code string) error {
 
 	// Local SMTP server
 	smtpHost := "127.0.0.1"
-	smtpPort := "25"
+	smtpPort := "2525"
 
 	// Authentication yo'q (local server)
 	var auth smtp.Auth = nil
