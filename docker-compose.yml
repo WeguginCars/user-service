@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
 
-  redis-db:  
+  redis-db:
     image: redis:latest
     container_name: redisemail
     ports:
@@ -57,8 +57,6 @@ services:
       migrate:
         condition: service_completed_successfully
 
-
-
   minio:
     image: docker.io/bitnami/minio:2024
     ports:
@@ -67,11 +65,35 @@ services:
     volumes:
       - minio_data:/bitnami/minio/data
     environment:
+      # Asosiy sozlamalar
       - MINIO_ROOT_USER=${MINIO_ACCESS_KEY_ID}
       - MINIO_ROOT_PASSWORD=${MINIO_SECRET_ACCESS_KEY}
       - MINIO_DEFAULT_BUCKETS=photos,videos,musics
       - MINIO_SERVER_URL=https://media.turbocarsautoexport.com
       - MINIO_BROWSER_REDIRECT_URL=https://media.turbocarsautoexport.com
+
+      # Performance optimizatsiyasi
+      - MINIO_API_REQUESTS_MAX=1000
+      - MINIO_API_REQUESTS_DEADLINE=10s
+      - MINIO_API_CLUSTER_DEADLINE=10s
+      - MINIO_API_SELECT_PARQUET=on
+
+      # Concurrent operations
+      - MINIO_API_SYNC_EVENTS=on
+      - MINIO_HEAL_MAX_SLEEP=1s
+      - MINIO_HEAL_MAX_IO=100
+
+      # Memory optimizatsiyasi
+      - MINIO_CACHE_DRIVES=/tmp/cache
+      - MINIO_CACHE_EXCLUDE="*.pdf,*.doc*"
+      - MINIO_CACHE_QUOTA=80
+      - MINIO_CACHE_AFTER=3
+      - MINIO_CACHE_WATERMARK_LOW=70
+      - MINIO_CACHE_WATERMARK_HIGH=90
+
+      # HTTP/2 yoqish
+      - MINIO_DOMAIN=media.turbocarsautoexport.com
+
     networks:
       - wegugin
     healthcheck:
@@ -80,14 +102,32 @@ services:
       timeout: 10s
       retries: 5
 
+    # Performance uchun resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+
+    # Tez restart policy
+    restart: unless-stopped
+
+    # Additional optimizations
+    tmpfs:
+      - /tmp/cache:size=500M,noexec,nosuid,nodev
+
 networks:
   wegugin:
     external: true
 
-
 volumes:
   minio_data:
     driver: local
+    # Performance uchun driver options
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/minio-data  # SSD disk bo'lsa yaxshi
   db:
     driver: local
-   
